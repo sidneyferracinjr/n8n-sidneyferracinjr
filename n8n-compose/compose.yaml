@@ -123,9 +123,9 @@ services:
     networks:
       - n8nnet
 
-  backup-cron:
+  n8n_backups:
     image: alpine
-    container_name: backup-cron_${NODE_ENV}
+    container_name: n8n_backups_${NODE_ENV}
     restart: always
     environment:
       - BACKUP_PASSWORD=${BACKUP_PASSWORD}
