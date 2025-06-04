@@ -210,5 +210,5 @@ Este repositório contém scripts e configurações para gerenciar backups e res
 Para realizar um backup manual, execute o script `backup.sh`:
 
 ```bash
-[backup.sh](http://_vscodecontentref_/1)
+./backup.sh
 ```
