@@ -21,7 +21,10 @@ services:
       - traefik_data:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
+      - TRAEFIK_DASHBOARD_USER=${TRAEFIK_DASHBOARD_USER}
+      - TRAEFIK_DASHBOARD_PASSWORD_HASH=${TRAEFIK_DASHBOARD_PASSWORD_HASH}
+
     networks:
       - n8nnet
 
@@ -72,6 +75,7 @@ services:
       - DB_TABLE_PREFIX=${DB_TABLE_PREFIX}
       - DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE}
       - DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
       - DB_POSTGRESDB_NON_ROOT_USER=${DB_POSTGRESDB_NON_ROOT_USER}
       - DB_POSTGRESDB_NON_ROOT_PASSWORD=${DB_POSTGRESDB_NON_ROOT_PASSWORD}
       - DB_POSTGRESDB_POOL_SIZE=${DB_POSTGRESDB_POOL_SIZE}
@@ -126,6 +130,9 @@ services:
   backup-cron:
     image: alpine
     container_name: backup-cron_${NODE_ENV}
+    restart: always
+    environment:
+      - BACKUP_PASSWORD=${BACKUP_PASSWORD}
     volumes:
       - ./scripts:/scripts
       - ./n8n_backups:/backups
