@@ -12,8 +12,8 @@ fi
 echo "Limpando backups antigos com retenção de $RETENTION_DAYS dias..."
 
 if [ -d "$BACKUPS_DIR" ]; then
-  # Encontra arquivos mais antigos que o período de retenção
-  FILES_TO_REMOVE=$(find "$BACKUPS_DIR" -type f -name "n8n_backup_*.sql.gz" -mtime +$RETENTION_DAYS)
+  # Encontra arquivos mais antigos que o período de retenção (.gz e .gz.enc)
+  FILES_TO_REMOVE=$(find "$BACKUPS_DIR" -type f \( -name "n8n_backup_*.sql.gz" -o -name "n8n_backup_*.sql.gz.enc" \) -mtime +$RETENTION_DAYS)
 
   if [ -z "$FILES_TO_REMOVE" ]; then
     echo "Nenhum backup antigo para remover."
