@@ -1,0 +1,14 @@
+FROM alpine:latest
+
+# Instalar cronie
+RUN apk add --no-cache cronie
+
+# Copiar os script de backups
+COPY ./scripts/backups.sh /backups.sh
+RUN chmod +x /backups.sh
+
+# Configurar crontab
+RUN echo "0 10 * * * /backups.sh" > /etc/crontabs/root
+
+# Comando de entrada
+CMD ["crond", "-f"]
