@@ -45,3 +45,12 @@ else
   echo "❌ $(date +"%Y-%m-%d %H:%M:%S") - Falha no backup"
   exit 1
 fi
+
+# Etapa opcional: Limpeza de backups antigos
+if [ "${ENABLE_BACKUP_CLEANUP:-false}" = "true" ]; then
+  echo "🧹 $(date +"%Y-%m-%d %H:%M:%S") - Iniciando limpeza de backups antigos..."
+  /bin/sh /scripts/cleanup-backups.sh
+  echo "✅ $(date +"%Y-%m-%d %H:%M:%S") - Limpeza de backups antigos concluída."
+else
+  echo "ℹ️ $(date +"%Y-%m-%d %H:%M:%S") - Limpeza de backups antigos desativada. Defina ENABLE_BACKUP_CLEANUP=true para ativar."
+fi
