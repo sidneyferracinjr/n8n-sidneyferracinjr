@@ -1,29 +1,4 @@
 services:
-  traefik:
-    container_name: traefik_${NODE_ENV}
-    image: traefik:v3.0
-    restart: always
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.traefik.address=:8080"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - traefik_data:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - TRAEFIK_DASHBOARD_USER=${TRAEFIK_DASHBOARD_USER}
-      - TRAEFIK_DASHBOARD_PASSWORD_HASH=${TRAEFIK_DASHBOARD_PASSWORD_HASH}
-
-    networks:
-      - n8nnet
 
   postgres:
     container_name: postgres_${NODE_ENV}
@@ -50,19 +25,6 @@ services:
     restart: always
     ports:
       - "127.0.0.1:5678:5678"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.n8n.rule=Host(`${N8N_HOST}`)
-      - traefik.http.routers.n8n.entrypoints=web,websecure
-      - traefik.http.middlewares.n8n.headers.SSLRedirect=true
-      - traefik.http.middlewares.n8n.headers.STSSeconds=315360000
-      - traefik.http.middlewares.n8n.headers.browserXSSFilter=true
-      - traefik.http.middlewares.n8n.headers.contentTypeNosniff=true
-      - traefik.http.middlewares.n8n.headers.forceSTSHeader=true
-      - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
-      - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
-      - traefik.http.middlewares.n8n.headers.STSPreload=true
-      - traefik.http.routers.n8n.middlewares=n8n@docker
     environment:
       - NODE_ENV=${NODE_ENV}
       - N8N_BINARY_DATA_STORAGE_PATH=${N8N_BINARY_DATA_STORAGE_PATH}
@@ -137,7 +99,6 @@ services:
       "echo '0 3 * * * /scripts/backup.sh' | crontab - && crond -f -L /dev/stdout"
 
 volumes:
-  traefik_data:
   postgres_data:
   n8n_data:
   binary_data:
