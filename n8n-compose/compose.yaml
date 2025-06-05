@@ -2,7 +2,7 @@ services:
 
   postgres:
     container_name: postgres_${NODE_ENV}
-    image: postgres:16.2
+    image: postgres:latest
     restart: always
     environment:
       - POSTGRES_USER=${DB_POSTGRESDB_USER}
@@ -21,7 +21,7 @@ services:
 
   n8n:
     container_name: n8n_${NODE_ENV}
-    image: docker.n8n.io/n8nio/n8n:1.48.0
+    image: docker.n8n.io/n8nio/n8n:latest
     restart: always
     ports:
       - "127.0.0.1:5678:5678"
