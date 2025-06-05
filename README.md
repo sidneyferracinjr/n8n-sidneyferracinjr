@@ -1,117 +1,115 @@
-# n8n + PostgreSQL Compose
 
-Este projeto orquestra o [n8n](https://n8n.io/) com banco de dados PostgreSQL usando Docker Compose.
+# n8n-sidneyferracinjr
 
----
+Este repositório contém a infraestrutura Docker personalizada para o **n8n**, uma plataforma de automação de workflows. O projeto é voltado para fácil deploy, automação de backups e restauração de dados, utilizando Docker Compose.
 
-## Pré-requisitos
+## 📦 Estrutura do Projeto
 
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
-- Renomeie e configure o arquivo `n8n-compose/.env` conforme necessário (não faça commit deste arquivo).
-
----
-
-## Subindo o ambiente
-
-No terminal, execute:
-
-```sh
-cd n8n-compose
-docker compose up -d
+```
+n8n-compose/
+├── .env               # Variáveis de ambiente (não versionado)
+├── .env.example       # Exemplo de variáveis de ambiente
+├── compose.yaml       # Arquivo principal do Docker Compose
+├── Dockerfile.n8n_backup  # Imagem personalizada para o contêiner de backup
+├── init-data.sh       # Script para inicialização do banco de dados
+└── scripts/
+    ├── backup.sh          # Script de backup automatizado
+    ├── cleanup-backups.sh # Script para limpar backups antigos
+    └── restore-backups.sh # Script de restauração manual
 ```
 
----
+## 🚀 Como usar
 
-## Acessando o n8n
+### 1. Clonar o repositório
 
-- Acesse: `http://localhost:5678`  
-- Usuário e senha padrão: configure conforme necessário no `.env`.
-
----
-
-## Backups do banco de dados
-
-O serviço `n8n_backups` está configurado para gerar backups automáticos do banco PostgreSQL diariamente às 3h da manhã.
-
-Os arquivos de backups são salvos no diretório `n8n-compose/backups`.
-
-### Executando backups manualmente
-
-Para rodar o backup manualmente, execute:
-
-```sh
-docker exec -it n8n_backups /scripts/backup.sh
+```bash
+git clone https://github.com/seuusuario/n8n-sidneyferracinjr.git
+cd n8n-sidneyferracinjr/n8n-compose
 ```
 
----
+### 2. Configurar variáveis de ambiente
 
-## Limpeza de backups antigos
+Copie o arquivo `.env.example` para `.env` e edite os valores conforme necessário:
 
-O script `cleanup-backups.sh` remove backups antigos, mantendo apenas os 7 mais recentes.
-
-Para executar manualmente:
-
-```sh
-docker exec -it n8n_backups /scripts/cleanup-backups.sh
+```bash
+cp .env.example .env
 ```
 
----
+Variáveis como:
 
-## Restaurando backups
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- `N8N_BASIC_AUTH_USER`, `N8N_BASIC_AUTH_PASSWORD`
+- `N8N_HOST`, `WEBHOOK_TUNNEL_URL`
+- `BACKUP_CRON_EXPRESSION`, etc.
 
-### Restaurando com script
+### 3. Subir os serviços
 
-Para facilitar a restauração de backups do banco PostgreSQL, utilize o script `restore-backups.sh`:
+```bash
+docker-compose up -d --build
+```
 
-1. Dê permissão de execução ao script (apenas na primeira vez):
+### 4. Acessar a aplicação
 
-   ```sh
-   chmod +x n8n-compose/scripts/restore-backups.sh
-   ```
+Acesse via navegador:
 
-2. Execute o script informando o caminho do arquivo de backup `.sql` ou `.sql.gz`:
+```
+https://<N8N_HOST>
+```
 
-   ```sh
-   ./n8n-compose/scripts/restore-backups.sh /caminho/para/backup.sql.gz
-   ```
+## 🗃️ Backups
 
-O script irá restaurar o backup diretamente no banco de dados do container `postgres` usando as variáveis de ambiente já configuradas.
+### Backup Automático
 
----
+Um contêiner cron executa backups automaticamente com base na expressão definida em `BACKUP_CRON_EXPRESSION`.
 
-## Persistência de dados
+### Backup Manual
 
-Os dados dos serviços são armazenados nos seguintes volumes Docker:
+Execute manualmente:
 
-- **PostgreSQL:**  
-  Os dados do banco ficam no volume `postgres_data`.  
-  No host, o Docker armazena os volumes em um diretório gerenciado automaticamente (veja com `docker volume inspect postgres_data`).
+```bash
+./scripts/backup.sh
+```
 
-- **n8n:**  
-  Dados de configuração e workflows ficam no volume `n8n_data`.
+### Restaurar Backup
 
-- **Backups:**  
-  Os arquivos de backups são salvos no diretório `n8n-compose/backups`.
+Para restaurar:
 
-> Para localizar o caminho físico dos volumes no host, use:
->
-> ```sh
-> docker volume inspect NOME_DO_VOLUME
-> ```
+```bash
+./scripts/restore-backups.sh <nome_do_arquivo_de_backup>
+```
 
-> Certifique-se de criar o diretório `n8n-compose/binaryData` antes de subir o ambiente:
-> 
-> ```sh
-> mkdir -p n8n-compose/binaryData
-> ```
+### Limpeza de Backups
 
----
+Para limpar backups antigos:
 
-## Observações
+```bash
+./scripts/cleanup-backups.sh
+```
 
-- O arquivo `.env` não deve ser versionado (está no `.gitignore`).
-- O script `init-data.sh` é executado automaticamente pelo container do PostgreSQL.
-- Para ambientes Linux, garanta permissão de execução: `chmod +x n8n-compose/init-data.sh`.
+## 🛠 Serviços
 
-> **Nota:** Este projeto não utiliza mais o Traefik como proxy reverso. Certifique-se de configurar o acesso ao n8n diretamente pelo endereço e porta configurados no Docker Compose.
+O `compose.yaml` define os seguintes serviços:
+
+- **n8n** – Plataforma de automação
+- **postgres** – Banco de dados relacional
+- **n8n_backups** – Serviço para gerenciar backups
+- **traefik** – (Opcional) Proxy reverso com suporte a HTTPS
+- **cloudflared** – (Opcional) Proxy seguro via Cloudflare Tunnel
+
+## 🧱 Base Docker
+
+Contêiner de backup é construído com base no `Dockerfile.n8n_backup` e é responsável por:
+
+- Executar scripts shell do diretório `scripts/`
+- Conectar ao volume de dados
+- Interagir com o PostgreSQL
+
+## 📋 Observações
+
+- Certifique-se de ter o `Docker` e `Docker Compose` instalados.
+- Use HTTPS e autenticação básica (`BASIC_AUTH`) para segurança.
+- O `init-data.sh` pode ser usado para inicializar dados de forma personalizada, se necessário.
+
+## 📄 Licença
+
+Este projeto está licenciado sob os termos da licença MIT.
