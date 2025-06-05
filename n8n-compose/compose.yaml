@@ -124,7 +124,7 @@ services:
       - n8nnet
 
   n8n_backups:
-    image: alpine
+    image: alpine:3.18
     container_name: n8n_backups_${NODE_ENV}
     restart: always
     environment:
